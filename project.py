@@ -21,7 +21,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 
 # TODO: Update this with your actual filename
-DATA_FILE = 'your_data.csv'
+DATA_FILE = 'banana_quality.csv'
 
 def load_and_explore_data(filename):
     """
@@ -38,9 +38,15 @@ def load_and_explore_data(filename):
     print("LOADING AND EXPLORING DATA")
     print("=" * 70)
     
-    # Your code here
-    
-    pass
+    data = pd.read_csv(filename)
+    print("=== Banana Quality Data ===")
+    print(f"\nFirst 5 rows: ")
+    print(data.head())
+    print(f"\nData Shape: {data.shape[0]} rows, {data.shape[1]} columns")
+    print(f"\nBasic statistics:")
+    print(data.describe())
+    print(f"\nColumn names: {list(data.columns)}")
+    return data
 
 
 def visualize_data(data):
@@ -62,6 +68,27 @@ def visualize_data(data):
     print("=" * 70)
     
     # Your code here
+    fig, axes = plt.subplots(3, 3, figsize=(12, 10))
+
+    fig.suptitle('Banana Features vs Quality', fontsize = 16, fontweight = 'bold')
+
+    axes[0, 0].scatter(data['Size'], data['Quality'], color='blue', alpha=0.6)
+    axes[0, 0].set_xlabel('Size(m)')
+    axes[0, 0].set_ylabel('Quality(cat)')
+    axes[0, 0].set_title('Size vs Quality')
+    axes[0, 0].grid(True, alpha=0.3)
+
+    axes[0, 1].scatter(data['Weight(kg)'], data['Quality'], color='green', alpha=0.6)
+    axes[0, 1].set_xlabel('Weight (kg)')
+    axes[0, 1].set_ylabel('Quality (cat)')
+    axes[0, 1].set_title('Weight vs Quality')
+    axes[0, 1].grid(True, alpha=0.3)
+
+    axes[0, 2].scatter(data['Sweetness(index)'], data['Quality'], color='red', alpha=0.6)
+    axes[0, 2].set_xlabel('Sweetness(index)')
+    axes[0, 2].set_ylabel('Quality')
+    axes[0, 2].set_title('Sweetness(index) vs Quality')
+    axes[0, 2].grid(True, alpha=0.3)
     # Hint: Use subplots like in Part 2!
     
     pass

@@ -89,10 +89,36 @@ def visualize_data(data):
     axes[0, 2].set_ylabel('Quality')
     axes[0, 2].set_title('Sweetness(index) vs Quality')
     axes[0, 2].grid(True, alpha=0.3)
-    # Hint: Use subplots like in Part 2!
-    
-    pass
 
+    axes[1, 0].scatter(data['Softness(index)'], data['Quality'], color='yellow', alpha=0.6)
+    axes[1, 0].set_xlabel('Softness(index)')
+    axes[1, 0].set_ylabel('Quality')
+    axes[1, 0].set_title('Softness(index) vs Quality')
+    axes[1, 0].grid(True, alpha=0.3)
+
+    axes[1, 1].scatter(data['HarvestTime(time)'], data['Quality'], color='purple', alpha=0.6)
+    axes[1, 1].set_xlabel('HarvestTime(time)')
+    axes[1, 1].set_ylabel('Quality')
+    axes[1, 1].set_title('HarvestTime(time) vs Quality')
+    axes[1, 1].grid(True, alpha=0.3)
+
+    axes[1, 2].scatter(data['Ripeness(index)'], data['Quality'], color='cyan', alpha=0.6)
+    axes[1, 2].set_xlabel('Ripeness(index)')
+    axes[1, 2].set_ylabel('Quality')
+    axes[1, 2].set_title('Ripeness(index) vs Quality')
+    axes[1, 2].grid(True, alpha=0.3)
+
+    axes[2, 0].scatter(data['Acidity(index)'], data['Quality'], color='black', alpha=0.6)
+    axes[2, 0].set_xlabel('Acidity(index)')
+    axes[2, 0].set_ylabel('Quality')
+    axes[2, 0].set_title('Acidity(index) vs Quality')
+    axes[2, 0].grid(True, alpha=0.3)
+
+    # Hint: Use subplots like in Part 2!
+    plt.tight_layout()
+    plt.savefig('banana_feature.png', dpi =300, bbox_inches ='tight')
+    print("\n✓ Feature plots saved as 'banana_feature.png'")
+    plt.show()
 
 def prepare_and_split_data(data):
     """
@@ -115,9 +141,27 @@ def prepare_and_split_data(data):
     print("PREPARING AND SPLITTING DATA")
     print("=" * 70)
     
-    # Your code here
+    feature_columns = ['Size', 'Weight', 'Sweetness', 'Softness', 'HarvestTime', 'Ripeness', 'Acidity']
+
+    target_columns = ['Quality']
+
+    X = data[feature_columns]
+
+    y = data[target_columns]
+
+    print(f"\n=== Feature Preparation===")
+    print(f"Features (X) shape: {X.shape}")
+    print(f"Target (y) shape: {y.shape}")
+    print(f"\nFeature Columns: {list(X.columns)}")
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .2, random_state=42)
+
+    print(f"\n=== Data Split ===")
+    print(f"Training set: {len(X_train)} samples ")
+    print(f"Testing Set: {len(X_test)} samples")
+
+    return X_train, X_test, y_train, y_test
     
-    pass
 
 
 def train_model(X_train, y_train):

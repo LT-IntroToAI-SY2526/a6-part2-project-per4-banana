@@ -78,37 +78,37 @@ def visualize_data(data):
     axes[0, 0].set_title('Size vs Quality')
     axes[0, 0].grid(True, alpha=0.3)
 
-    axes[0, 1].scatter(data['Weight(kg)'], data['Quality'], color='green', alpha=0.6)
+    axes[0, 1].scatter(data['Weight'], data['Quality'], color='green', alpha=0.6)
     axes[0, 1].set_xlabel('Weight (kg)')
     axes[0, 1].set_ylabel('Quality (cat)')
     axes[0, 1].set_title('Weight vs Quality')
     axes[0, 1].grid(True, alpha=0.3)
 
-    axes[0, 2].scatter(data['Sweetness(index)'], data['Quality'], color='red', alpha=0.6)
+    axes[0, 2].scatter(data['Sweetness'], data['Quality'], color='red', alpha=0.6)
     axes[0, 2].set_xlabel('Sweetness(index)')
     axes[0, 2].set_ylabel('Quality')
     axes[0, 2].set_title('Sweetness(index) vs Quality')
     axes[0, 2].grid(True, alpha=0.3)
 
-    axes[1, 0].scatter(data['Softness(index)'], data['Quality'], color='yellow', alpha=0.6)
+    axes[1, 0].scatter(data['Softness'], data['Quality'], color='yellow', alpha=0.6)
     axes[1, 0].set_xlabel('Softness(index)')
     axes[1, 0].set_ylabel('Quality')
     axes[1, 0].set_title('Softness(index) vs Quality')
     axes[1, 0].grid(True, alpha=0.3)
 
-    axes[1, 1].scatter(data['HarvestTime(time)'], data['Quality'], color='purple', alpha=0.6)
+    axes[1, 1].scatter(data['HarvestTime'], data['Quality'], color='purple', alpha=0.6)
     axes[1, 1].set_xlabel('HarvestTime(time)')
     axes[1, 1].set_ylabel('Quality')
     axes[1, 1].set_title('HarvestTime(time) vs Quality')
     axes[1, 1].grid(True, alpha=0.3)
 
-    axes[1, 2].scatter(data['Ripeness(index)'], data['Quality'], color='cyan', alpha=0.6)
+    axes[1, 2].scatter(data['Ripeness'], data['Quality'], color='cyan', alpha=0.6)
     axes[1, 2].set_xlabel('Ripeness(index)')
     axes[1, 2].set_ylabel('Quality')
     axes[1, 2].set_title('Ripeness(index) vs Quality')
     axes[1, 2].grid(True, alpha=0.3)
 
-    axes[2, 0].scatter(data['Acidity(index)'], data['Quality'], color='black', alpha=0.6)
+    axes[2, 0].scatter(data['Acidity'], data['Quality'], color='black', alpha=0.6)
     axes[2, 0].set_xlabel('Acidity(index)')
     axes[2, 0].set_ylabel('Quality')
     axes[2, 0].set_title('Acidity(index) vs Quality')
@@ -164,7 +164,7 @@ def prepare_and_split_data(data):
     
 
 
-def train_model(X_train, y_train):
+def train_model(X_train, y_train, feature_names):
     """
     Train the linear regression model
     
@@ -185,12 +185,30 @@ def train_model(X_train, y_train):
     print("TRAINING MODEL")
     print("=" * 70)
     
-    # Your code here
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    print(f"\n=== Model Training Complete ===")
+    print(f"Intercept: {model.intercept_:.2f}")
+
+    print(f"\nCoefficients:")
+    for name, coef in zip(feature_names, model.coef_):
+        print(f"  {name}: {coef:.2f}")
     
-    pass
+    print(f"\nEquation:")
+    equation = f"Price = "
+    for i, (name, coef) in enumerate(zip(feature_names, model.coef_)):
+        if i == 0:
+            equation += f"{coef:.2f} x {name}"
+        else:
+            equation += f"+ ({coef:.2f}) x {name}"
+    equation += f" + {model.intercept_:.2f}"
+    print(equation)
+    return model
 
 
-def evaluate_model(model, X_test, y_test):
+
+
+def evaluate_model(model, X_test, y_test, feature_names):
     """
     Evaluate model performance
     
@@ -214,11 +232,31 @@ def evaluate_model(model, X_test, y_test):
     print("=" * 70)
     
     # Your code here
+    predictions = model.predict(X_test)
+
+    r2 = r2_score(y_test, predictions)
+    mse = mean_squared_error(y_test, predictions)
+    rmse = np.sqrt(mse)
+
+    print(f"\n=== Model Performance ===")
+    print(f"R^2 Score: {r2:.4f}")
+    print(f" -> Model explains {r2*100:.2f}% of quality variation")
+
+    print(f"\nRoot Mean Squared Error: {rmse:.2f}")
+    print(f" -> On average, predictions are off by {rmse:.2f}")
+
+    print(f"\n=== Feature Importance ===")
+    feature_importance = list(zip(feature_names, np.abs(model.coef_)))
+    feature_importance.sort(key=lambda x: x[1], reverse=True)
+
+    for i, (name, importance) in enumerate(feature_importance, 1):
+        print(f"{i}. {name}: {importance:.2f}")
+    return predictions
+
     
-    pass
 
 
-def make_prediction(model):
+def make_prediction(model, size, weight, sweetness, softness, harvesttime, ripeness, acidity):
     """
     Make a prediction for a new example
     
@@ -238,9 +276,13 @@ def make_prediction(model):
     # Your code here
     # Example: If predicting house price with [sqft, bedrooms, bathrooms]
     # sample = pd.DataFrame([[2000, 3, 2]], columns=feature_names)
-    
-    pass
-
+    banana_features = pd.DataFrame([[size, weight, sweetness, softness, harvesttime, ripeness, acidity]],
+                                    columns=['Size', 'Weight', 'Sweetness', 'Softness', 'HarvestTime', 'Ripeness', 'Acidity'])
+    predicted_quality= model.predict(banana_features)[0]
+    print(f"\n=== New Prediction ===")
+    print(f"Banana specs: {size}, kg of {weight}, level of Sweetness: {sweetness}, level of Softness: {softness}, amount of time {harvesttime}, level of Ripeness: {ripeness}, level of Acidity: {acidity} ")
+    print(f"Predicted quality: ${predicted_quality:,.2f}")
+    return predicted_quality
 
 if __name__ == "__main__":
     # Step 1: Load and explore

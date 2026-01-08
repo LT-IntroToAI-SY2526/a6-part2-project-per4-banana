@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-import numpy as np
+import numpy as np  
 
 # TODO: Update this with your actual filename
 DATA_FILE = 'banana_quality.csv'
@@ -164,7 +164,7 @@ def prepare_and_split_data(data):
     
 
 
-def train_model(X_train, y_train, feature_names):
+def train_model(X_train, y_train, feature_names=None):
     """
     Train the linear regression model
     
@@ -185,30 +185,44 @@ def train_model(X_train, y_train, feature_names):
     print("TRAINING MODEL")
     print("=" * 70)
     
+    if feature_names is None:
+        feature_names = list(X_train.columns)
+
     model = LinearRegression()
     model.fit(X_train, y_train)
     print(f"\n=== Model Training Complete ===")
-    print(f"Intercept: {model.intercept_:.2f}")
+
+    # Normalize shapes for printing (coef_ may be 2D when y is a DataFrame)
+    coefs = np.array(model.coef_).ravel()
+    intercept = model.intercept_
+    try:
+        intercept = float(np.array(intercept).ravel()[0])
+    except Exception:
+        intercept = float(intercept)
+
+    print(f"Intercept: {intercept:.2f}")
 
     print(f"\nCoefficients:")
-    for name, coef in zip(feature_names, model.coef_):
+    for name, coef in zip(feature_names, coefs):
         print(f"  {name}: {coef:.2f}")
-    
+
     print(f"\nEquation:")
-    equation = f"Price = "
-    for i, (name, coef) in enumerate(zip(feature_names, model.coef_)):
+    equation = f"Quality = "
+    for i, (name, coef) in enumerate(zip(feature_names, coefs)):
+        sign = "" if coef >= 0 else "- "
+        term = f"{abs(coef):.2f} x {name}"
         if i == 0:
-            equation += f"{coef:.2f} x {name}"
+            equation += f"{sign}{term}"
         else:
-            equation += f"+ ({coef:.2f}) x {name}"
-    equation += f" + {model.intercept_:.2f}"
+            equation += f" + ({sign}{term})"
+    equation += f" + {intercept:.2f}"
     print(equation)
     return model
 
 
 
 
-def evaluate_model(model, X_test, y_test, feature_names):
+def evaluate_model(model, X_test, y_test, feature_names=None):
     """
     Evaluate model performance
     
@@ -246,7 +260,14 @@ def evaluate_model(model, X_test, y_test, feature_names):
     print(f" -> On average, predictions are off by {rmse:.2f}")
 
     print(f"\n=== Feature Importance ===")
-    feature_importance = list(zip(feature_names, np.abs(model.coef_)))
+    if feature_names is None:
+        try:
+            feature_names = list(X_test.columns)
+        except Exception:
+            feature_names = [f"x{i}" for i in range(len(np.array(model.coef_).ravel()))]
+
+    coefs = np.array(model.coef_).ravel()
+    feature_importance = list(zip(feature_names, np.abs(coefs)))
     feature_importance.sort(key=lambda x: x[1], reverse=True)
 
     for i, (name, importance) in enumerate(feature_importance, 1):
@@ -256,7 +277,7 @@ def evaluate_model(model, X_test, y_test, feature_names):
     
 
 
-def make_prediction(model, size, weight, sweetness, softness, harvesttime, ripeness, acidity):
+def make_prediction(model, size=12.0, weight=0.25, sweetness=5.0, softness=5.0, harvesttime=7.0, ripeness=5.0, acidity=1.0):
     """
     Make a prediction for a new example
     
@@ -278,10 +299,14 @@ def make_prediction(model, size, weight, sweetness, softness, harvesttime, ripen
     # sample = pd.DataFrame([[2000, 3, 2]], columns=feature_names)
     banana_features = pd.DataFrame([[size, weight, sweetness, softness, harvesttime, ripeness, acidity]],
                                     columns=['Size', 'Weight', 'Sweetness', 'Softness', 'HarvestTime', 'Ripeness', 'Acidity'])
-    predicted_quality= model.predict(banana_features)[0]
+    predicted_quality = model.predict(banana_features)
+    try:
+        predicted_quality = float(np.array(predicted_quality).ravel()[0])
+    except Exception:
+        predicted_quality = predicted_quality[0]
     print(f"\n=== New Prediction ===")
     print(f"Banana specs: {size}, kg of {weight}, level of Sweetness: {sweetness}, level of Softness: {softness}, amount of time {harvesttime}, level of Ripeness: {ripeness}, level of Acidity: {acidity} ")
-    print(f"Predicted quality: ${predicted_quality:,.2f}")
+    print(f"Predicted quality: {predicted_quality:.2f}")
     return predicted_quality
 
 if __name__ == "__main__":

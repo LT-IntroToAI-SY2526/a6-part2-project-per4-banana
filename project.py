@@ -141,6 +141,9 @@ def prepare_and_split_data(data):
     print("PREPARING AND SPLITTING DATA")
     print("=" * 70)
     
+    # Encode categorical target to numerical
+    data['Quality'] = data['Quality'].map({'Good': 1, 'Bad': 0})
+
     feature_columns = ['Size', 'Weight', 'Sweetness', 'Softness', 'HarvestTime', 'Ripeness', 'Acidity']
 
     target_columns = ['Quality']
